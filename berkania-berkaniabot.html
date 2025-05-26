@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="UTF-8">
+   <style>
+       body {
+           background-color: #000033; /* Темно-синий цвет */
+           color: #FFFFFF; /* Белый цвет */
+       }
+   </style>
+   <title>Статус сервера Minecraft</title>
+</head>
+<body>
+   <h3>Я создал бота для некоммерческого проекта для игры Minecraft в популярном мессенджере Telegram</h3>
+   <a href="https://github.com/1GANREN/berkania4bot">berkaniabot</a>
+   <h3>Тут тоже попытаюсь сделать отслеживание</h3>
+   <h2>Berkania Minecraft:</h2>
+   <div id="server-status"></div>
+   <script type="text/javascript">
+       document.addEventListener("DOMContentLoaded", function() {
+           const ip = "5.137.44.219:12854"; // Замените на ваш IP или доменное имя
+           fetch(`https://api.mcsrvstat.us/2/${ip}`)
+               .then(response => response.json())
+               .then(data => {
+                   let statusDiv = document.querySelector("#server-status");
+                   
+                   if (!data.online) {
+                       statusDiv.innerHTML = `
+                           <span style="color:#FF0000;">🔴 Оффлайн</span>
+                       `;
+                       return;
+                   }
+       
+                   let playerText = "";
+                   if (data.players) {
+                       playerText = `
+                         👥 Игроков: ${data.players.online}/${data.players.max}<br/>
+                       `;
+                   }
+       
+                   statusDiv.innerHTML = `
+                       <span style="color:#00FF00;">🟢 Онлайн</span><br/>
+                       ${playerText}
+                   `;
+               })
+               .catch(error => console.error("Ошибка:", error));
+       });
+   </script>
+</body>
+</html>
