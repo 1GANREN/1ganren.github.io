@@ -427,16 +427,30 @@
             const playersCountValueElement = document.getElementById('players-count-value');
             const playerListElement = document.getElementById('player-list');
             
+            // Функция для загрузки IP из файла
+            async function loadServerIp() {
+                try {
+                    const response = await fetch('ip.txt');
+                    if (!response.ok) throw new Error("Файл ip.txt не найден");
+                    const ip = await response.text();
+                    return ip.trim(); // Удаляем лишние пробелы и переносы строк
+                } catch (error) {
+                    console.error("Ошибка загрузки IP:", error);
+                    // Возвращаем дефолтный IP, если файл не найден
+                    return "ваш.сервер.ip";
+                }
+            }
+            
             // Функция для обновления статуса сервера
             async function updateServerStatus() {
                 try {
                     // Показываем состояние загрузки
                     playerListElement.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Загрузка списка игроков...</p></div>';
                     
-                    // Установите здесь IP вашего сервера
-                    const ip = "ваш.сервер.ip"; // Замените на реальный IP вашего сервера
+                    // Загружаем IP из файла
+                    const ip = await loadServerIp();
                     
-                    // Обновляем IP
+                    // Обновляем IP в интерфейсе
                     serverIpElement.textContent = ip;
                     
                     // Запрос к API сервера Minecraft
