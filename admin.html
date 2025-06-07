@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель | GANRENhub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>GANRENhub ADMIN</h1>
+            </div>
+            <nav class="admin-nav">
+                <a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Панель</a>
+                <a href="#"><i class="fas fa-users"></i> Пользователи</a>
+                <a href="#"><i class="fas fa-cog"></i> Настройки</a>
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+            </nav>
+        </header>
+        
+        <main class="admin-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Пользователи</h3>
+                    <p class="stat-value">1,024</p>
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card">
+                    <h3>Активность</h3>
+                    <p class="stat-value">87%</p>
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-card">
+                    <h3>Онлайн</h3>
+                    <p class="stat-value">156</p>
+                    <i class="fas fa-user-clock"></i>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2>Последние действия</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Пользователь</th>
+                            <th>Действие</th>
+                            <th>Время</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#1001</td>
+                            <td>admin</td>
+                            <td>Изменение настроек</td>
+                            <td>2 мин назад</td>
+                        </tr>
+                        <tr>
+                            <td>#1000</td>
+                            <td>user123</td>
+                            <td>Регистрация</td>
+                            <td>10 мин назад</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Проверка авторизации
+        if (!localStorage.getItem('authToken')) {
+            window.location.href = 'index.html';
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('authToken');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

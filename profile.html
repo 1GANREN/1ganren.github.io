@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль | GANRENhub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="profile-container">
+        <header class="profile-header">
+            <div class="logo">
+                <i class="fas fa-user-circle"></i>
+                <h1>Мой профиль</h1>
+            </div>
+            <nav class="profile-nav">
+                <a href="#" class="active"><i class="fas fa-user"></i> Профиль</a>
+                <a href="#"><i class="fas fa-cog"></i> Настройки</a>
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+            </nav>
+        </header>
+        
+        <main class="profile-content">
+            <div class="profile-info">
+                <div class="avatar">
+                    <img src="https://via.placeholder.com/150" alt="Аватар">
+                    <button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+                <div class="user-details">
+                    <h2 id="username">Username</h2>
+                    <p><i class="fas fa-envelope"></i> <span id="userEmail">user@example.com</span></p>
+                    <p><i class="fas fa-calendar-alt"></i> Зарегистрирован: <span id="regDate">01.01.2023</span></p>
+                </div>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <h3>Активность</h3>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 75%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <h3>Друзья</h3>
+                    <p class="stat-value">24</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        // Загрузка данных пользователя
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('authToken')) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Здесь будет запрос к API для получения данных пользователя
+            const userData = {
+                username: 'GANREN_User',
+                email: 'user@ganrenhub.com',
+                regDate: '15.05.2023'
+            };
+            
+            document.getElementById('username').textContent = userData.username;
+            document.getElementById('userEmail').textContent = userData.email;
+            document.getElementById('regDate').textContent = userData.regDate;
+            
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

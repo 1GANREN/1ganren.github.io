@@ -1,0 +1,214 @@
+/* GANRENhub Main Stylesheet */
+/* Версия 1.2 */
+
+:root {
+    /* Цветовая схема */
+    --primary: #4b7bec;
+    --primary-dark: #3867d6;
+    --accent: #ff9f43;
+    --accent-dark: #fa8231;
+    --success: #20bf6b;
+    --danger: #eb3b5a;
+    --warning: #fed330;
+    
+    /* Текстовые цвета */
+    --text-light: #f1f2f6;
+    --text-dark: #2f3640;
+    --text-muted: #a5b1c2;
+    
+    /* Фоновые цвета */
+    --bg-dark: #1e272e;
+    --bg-darker: #0c2461;
+    --bg-light: #dfe6e9;
+    
+    /* Границы */
+    --border-radius: 8px;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Базовые стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-darker), var(--bg-dark));
+    color: var(--text-light);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* Контейнеры */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.auth-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background: rgba(30, 39, 46, 0.9);
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Формы */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-light);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.2);
+}
+
+.form-group i {
+    position: absolute;
+    right: 15px;
+    top: 40px;
+    color: var(--text-muted);
+}
+
+/* Кнопки */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(75, 123, 236, 0.4);
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: white;
+}
+
+/* Индикатор сложности пароля */
+.password-strength {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s, background 0.3s;
+}
+
+.strength-1 { width: 20%; background: var(--danger); }
+.strength-2 { width: 40%; background: #fa8231; }
+.strength-3 { width: 60%; background: var(--warning); }
+.strength-4 { width: 80%; background: #26de81; }
+.strength-5 { width: 100%; background: var(--success); }
+
+/* Сообщения */
+.alert {
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+}
+
+.alert-danger {
+    background-color: rgba(235, 59, 90, 0.2);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+}
+
+.alert-success {
+    background-color: rgba(32, 191, 107, 0.2);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+/* Навигация */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: var(--text-light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--accent);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .auth-container {
+        margin: 20px auto;
+        padding: 20px;
+    }
+    
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .nav-links {
+        margin-top: 15px;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}

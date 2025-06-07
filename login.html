@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему | GANRENhub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Minecraftia&family=Press+Start+2P&display=swap');
+        
+        :root {
+            --primary: #4b7bec;
+            --secondary: #3867d6;
+            --accent: #ff9f43;
+            --dark: #1e272e;
+            --darker: #0c2461;
+            --success: #20bf6b;
+            --danger: #eb3b5a;
+            --text: #f1f2f6;
+            --grass: #78e08f;
+            --dirt: #8d6e63;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--text);
+            font-family: 'Minecraftia', sans-serif;
+            min-height: 100vh;
+            background-attachment: fixed;
+            background-size: cover;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.pinimg.com/originals/21/95/7a/21957a5d9a8d9f5e7b2d8b8e1d4d4d4c.png') center/cover;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(30, 39, 46, 0.9);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent 45%,
+                rgba(255, 159, 67, 0.1) 50%,
+                transparent 55%
+            );
+            animation: shine 6s infinite linear;
+            z-index: -1;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(255, 159, 67, 0.7);
+        }
+        
+        .logo h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #a5b1c2;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Minecraftia', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.3);
+        }
+        
+        .form-group i {
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -15px;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .remember-me input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+        
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .forgot-password:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+        
+        .login-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            font-family: 'Minecraftia', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(75, 123, 236, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(75, 123, 236, 0.6);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+        
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #a5b1c2;
+        }
+        
+        .register-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success-message {
+            color: var(--success);
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        /* Анимации */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shine {
+            0% {
+                transform: rotate(0deg) translate(-10%, -10%);
+            }
+            100% {
+                transform: rotate(360deg) translate(-10%, -10%);
+            }
+        }
+        
+        /* Медиа-запросы */
+        @media (max-width: 600px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <i class="fas fa-server"></i>
+            <h1>GANRENhub LOGIN</h1>
+        </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <input type="text" id="username" name="username" placeholder="Введите ваш ник" required>
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" placeholder="Введите ваш пароль" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Запомнить меня</label>
+                </div>
+                <a href="#" class="forgot-password">Забыли пароль?</a>
+            </div>
+            
+            <button type="submit" class="login-btn">Войти</button>
+            
+            <div class="register-link">
+                Нет аккаунта? <a href="regin.html" id="registerLink">Зарегистрироваться</a>
+            </div>
+        </form>
+    </div>
+
+<!-- В секции script замените обработчик формы входа на этот: -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Загрузка сохраненных данных
+        const savedUser = localStorage.getItem('ganrenhub_credentials');
+        if(savedUser) {
+            const {username, password, remember} = JSON.parse(savedUser);
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            document.getElementById('remember').checked = remember;
+        }
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember').checked;
+            
+            // Сохранение данных
+            if(rememberMe) {
+                localStorage.setItem('ganrenhub_credentials', JSON.stringify({
+                    username, password, remember: true
+                }));
+            } else {
+                localStorage.removeItem('ganrenhub_credentials');
+            }
+            
+            // Здесь код отправки на сервер...
+            console.log('Логин:', username, 'Пароль:', password);
+            
+            // После успешной авторизации:
+            localStorage.setItem('ganrenhub_auth', 'true');
+            window.location.href = 'profile.html';
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Проверка авторизации уже в auth.js
+        
+        // Загрузка данных пользователя
+        const savedCreds = getSavedCredentials();
+        if (savedCreds) {
+            document.getElementById('username-display').textContent = savedCreds.username;
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            logout();
+        });
+    });
+</script>
+</body>
+</html>
