@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гид по macOS для новичков</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Ubuntu+Mono&display=swap');
+        
+        :root {
+            --primary: #0071e3;
+            --primary-light: #2997ff;
+            --accent: #ff9f43;
+            --dark: #1d1d1f;
+            --darker: #121212;
+            --light: #f5f5f7;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --warning: #ff9500;
+            --text: #f5f5f7;
+            --text-secondary: #86868b;
+            --card-bg: rgba(30, 30, 30, 0.8);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--text);
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo i {
+            font-size: 3rem;
+            color: var(--primary-light);
+        }
+        
+        .logo h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary-light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .intro-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        .intro-card p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+        
+        .toc-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.9s ease;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            color: var(--primary-light);
+            font-size: 1.5rem;
+        }
+        
+        .section-title i {
+            font-size: 1.3rem;
+        }
+        
+        .toc-list {
+            list-style-type: none;
+        }
+        
+        .toc-item {
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .toc-item:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+        
+        .toc-link {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            padding: 5px 0;
+        }
+        
+        .toc-link:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .guide-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease;
+        }
+        
+        .step {
+            margin-bottom: 30px;
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-title .number {
+            background: var(--accent);
+            color: var(--dark);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .step-content {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        .step-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s ease;
+        }
+        
+        .step-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .app-card {
+            background: rgba(41, 151, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-light);
+        }
+        
+        .app-title {
+            font-size: 1.4rem;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .app-description {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.7;
+        }
+        
+        .app-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            background: rgba(255, 159, 67, 0.1);
+            border-radius: 6px;
+        }
+        
+        .app-link:hover {
+            background: rgba(255, 159, 67, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--card-border);
+        }
+        
+        /* Анимации */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .logo h1 {
+                font-size: 1.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .guide-card, .toc-card, .intro-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <a href="index.html" style="font-size: 30px;" >
+                    <i class="fab fa-apple"></i>
+                    Гид по macOS для новичков
+                </a>
+            </div>
+        </header>
+        
+        <div class="intro-card">
+            <p>Этот раздел создан для тех, кто только начал знакомство с macOS или хочет освежить свои знания. Здесь собраны решения для проблем, которые часто раздражают новичков.</p>
+        </div>
+        
+        <div class="toc-card" id="toc">
+            <div class="section-title">
+                <i class="fas fa-bookmark"></i>
+                <h2>Содержание</h2>
+            </div>
+            <ul class="toc-list">
+                <li class="toc-item"><a href="#section1" class="toc-link">Что делать после первого включения</a></li>
+                <li class="toc-item"><a href="#section2" class="toc-link">Топ программ для macOS</a></li>
+                <li class="toc-item"><a href="#section3" class="toc-link">Удаление виртуальных звуковых устройств</a></li>
+            </ul>
+        </div>
+        
+        <div class="guide-card" id="section1">
+            <div class="section-title">
+                <i class="fas fa-box-open"></i>
+                <h2>Что делать после первого включения</h2>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title"><span class="number">1</span>Отключение автообновлений</h3>
+                <p class="step-content">Первым делом рекомендуется выключить автоматические обновления, чтобы система не обновлялась без вашего ведома.</p>
+                <p class="step-content">Нажмите на логотип Apple в верхнем левом углу экрана:</p>
+                <img src="https://downloader.disk.yandex.ru/preview/db32ed13c176553b6c2be76e4de678c5a518ab0075ff2650f55fcfed582d1dce/6846dcbe/MrcvCcHagX2IMZgZmpB_V9fUIYjSZ7k1x09FDCw12z6n0vAH8IE-pr0wWFi4xOKeHQ0k2jvjTdmVUrcAN0OUfQ%3D%3D?uid=0&filename=Снимок%20экрана%202025-06-09%20в%2016.05.48.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v3&size=2048x2048" alt="Меню Apple" class="step-image">
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title"><span class="number">2</span>Переход в системные настройки</h3>
+                <p class="step-content">В открывшемся меню выберите пункт "Системные настройки":</p>
+                
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title"><span class="number">3</span>Отключение автообновлений</h3>
+                <p class="step-content">В Системных настройках:</p>
+                <ol style="margin-left: 20px; color: var(--text-secondary); margin-bottom: 15px;">
+                    <li style="margin-bottom: 8px;">Откройте раздел "Основные"</li>
+                    <li style="margin-bottom: 8px;">Перейдите в "Обновление ПО"</li>
+                    <img src="https://4.downloader.disk.yandex.ru/preview/44927dd5e76a7f9247e3a186663d847546079307c38dfffb9852522059598d41/inf/PFUHi49v6hf9JJ2YibfP8mqwS9I_Gb3mRpB4eq6S-u5LotUdez8imUxyzZGa7T4QXO3FXRA8wJ0BK3ZM0PJUbA%3D%3D?uid=1039761330&filename=Снимок%20экрана%202025-06-09%20в%2016.13.00.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=1039761330&tknv=v3&size=1888x1472" alt="Системные настройки" class="step-image">
+                    <li style="margin-bottom: 8px;">Нажмите "Дополнительно..."</li>
+                </ol>
+                <p class="step-content">Отключите следующие опции:</p>
+                <ul style="margin-left: 20px; color: var(--text-secondary);">
+                    <li style="margin-bottom: 8px;">✓ Загружать новые доступные обновления</li>
+                    <li style="margin-bottom: 8px;">✓ Устанавливать обновления macOS</li>
+                    <li>✓ Устанавливать обновления приложений из App Store</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="guide-card" id="section2">
+            <div class="section-title">
+                <i class="fas fa-star"></i>
+                <h2>Топ программ для macOS</h2>
+            </div>
+            
+            <div class="app-card">
+                <h3 class="app-title"><i class="fas fa-mouse"></i> MOS</h3>
+                <p class="app-description">Незаменимая программа, которая исправляет поведение колесика мыши в macOS. По умолчанию прокрутка в macOS инвертирована, и MOS позволяет сделать её привычной для пользователей Windows.</p>
+                <a href="https://mos.caldis.me/?from=MosApplication&version=3.5.0" class="app-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Официальный сайт MOS
+                </a>
+            </div>
+            <div class="app-card">
+                <h3 class="app-title"><i class="fa-solid fa-file-zipper"></i> Keka</h3>
+                <p class="app-description">Архиватор как 7zip с windows он нужен так как mac os может неподдежвивать некоторые архивы</p>
+                <a href="https://www.keka.io/en/" class="app-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Официальный сайт keka(бесплатно)
+                </a>
+                <a href="https://apps.apple.com/ru/app/keka/id470158793?mt=12" class="app-link" target="_blank">
+                    <i class="fa-brands fa-app-store"></i> AppStore keka (499 рублей)
+                </a>
+            </div>
+            <div class="app-card">
+                <h3 class="app-title"><i class="fa-solid fa-code"></i>Программы для программирования</h3>
+                <p class="app-description">Незаменимая программа vs code в предстовеление не нуждается</p>
+                <a href="https://code.visualstudio.com/download" class="app-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Официальный сайт vscode
+                </a>
+                <p class="app-description">у меня gcc не работал без apple xcode если вы планируете его испльзовать то надо скачать и еще в терминале написать gcc и согласится чтобы скачать </p>
+                <a href="https://apps.apple.com/ru/app/xcode/id497799835?mt=12" class="app-link" target="_blank">
+                    <i class="fa-brands fa-app-store"></i> appstore Xcode
+                </a>
+            </div>
+            <div class="app-card">
+                <h3 class="app-title"><i class="fa-duotone fa-light fa-bulldozer"></i> Dozer</h3>
+                <p class="app-description">И последняя программа она необезательная лучше посмотрите как ей пользоваться в интернете на делает как на windows "трей" где можно скрыть вкладки чтобы верхее меню было более свободное</p>
+                <a href="https://github.com/Mortennn/Dozer/releases/tag/v4.0.0" class="app-link" target="_blank">
+                    <i class="fa-brands fa-github"></i> Официальный сайт Dozer
+                </a>
+            </div>
+        </div>
+        
+        <div class="guide-card" id="section3">
+            <div class="section-title">
+                <i class="fas fa-volume-off"></i>
+                <h2>Удаление виртуальных звуковых устройств</h2>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title"><span class="number">1</span>Удаление через Audio MIDI Setup</h3>
+                <p class="step-content">Сначала попробуйте стандартный способ удаления:</p>
+                <ol style="margin-left: 20px; color: var(--text-secondary); margin-bottom: 15px;">
+                    <li style="margin-bottom: 8px;">Откройте приложение "Audio MIDI Setup" (можно найти через Spotlight поиск)</li>
+                    <li style="margin-bottom: 8px;">В левой панели выберите ненужное виртуальное устройство</li>
+                    <li style="margin-bottom: 8px;">Нажмите кнопку "-" в нижней части окна для удаления</li>
+                    <li>Перезагрузите Mac</li>
+                </ol>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title"><span class="number">2</span>Удаление через папку HAL</h3>
+                <p class="step-content">Если стандартный способ не сработал:</p>
+                <ol style="margin-left: 20px; color: var(--text-secondary); margin-bottom: 15px;">
+                    <li style="margin-bottom: 8px;">Откройте Finder и перейдите в папку <code>/Library/Audio/Plug-Ins/HAL</code></li>
+                    <li style="margin-bottom: 8px;">Найдите папку, соответствующую имени виртуального устройства (например, <code>JumpAudio.driver</code>)</li>
+                    <li style="margin-bottom: 8px;">Удалите эту папку (может потребоваться ввод пароля администратора)</li>
+                    <li>Перезагрузите Mac</li>
+                </ol>
+                <p class="step-content">После перезагрузки проверьте настройки звука — удалённое устройство не должно отображаться.</p>
+            </div>
+            
+            <div class="step">
+                <h3 class="step-title"><span class="number">3</span>Проверка и дополнительные действия</h3>
+                <p class="step-content">Если устройство снова появляется:</p>
+                <ul style="margin-left: 20px; color: var(--text-secondary);">
+                    <li style="margin-bottom: 8px;">Проверьте, не установлено ли соответствующее приложение, которое воссоздаёт драйвер</li>
+                    <li style="margin-bottom: 8px;">Посмотрите в системных настройках → Звук → Вывод/Ввод, нет ли там остатков удалённого устройства</li>
+                    <li>Можно попробовать очистить кэш: <code>~/Library/Caches</code> и <code>/Library/Caches</code></li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Гид по macOS для новичков | создал ganren</p>
+        </footer>
+    </div>
+</body>
+</html>
