@@ -1,21 +1,30 @@
-rs.setOutput("bottom", false) -- изначально дверь закрыта
+local side = "right" -- сторона куда подключена дверь (редстоун)
+local keyName = "disk/key" -- путь к файлу на дискете
 
-while true do
-  if disk.isPresent("top") then
-    if fs.exists("disk/.security/key") then
-      local file = fs.open("disk/.security/key", "r")
-      local pass = file.readLine()
-      file.close()
+-- Проверяем есть ли дискета
+if not disk.isPresent() then
+    print("Вставьте диск с ключом")
+    return
+end
 
-      if pass == "lemmein" then
-        rs.setOutput("bottom", true) -- открыть дверь
-        sleep(3)
-        rs.setOutput("bottom", false) -- закрыть дверь
-      end
-      disk.eject("top")
-    else
-      disk.eject("top")
-    end
-  end
-  sleep(0.1)
+-- Читаем ключ с дискеты
+local file = fs.open(keyName, "r")
+if not file then
+    print("Ключ не найден на диске")
+    return
+end
+
+local keyCode = file.readLine()
+file.close()
+
+local masterKey = "lemmein" -- секретный код
+
+if keyCode == masterKey then
+    print("Дверь открыта")
+    redstone.setOutput(side, true) -- подаем сигнал (открываем дверь)
+    sleep(5) -- держим дверь открытой 5 секунд
+    redstone.setOutput(side, false) -- закрываем дверь
+else
+    print("Неверный ключ")
+    redstone.setOutput(side, false)
 end
