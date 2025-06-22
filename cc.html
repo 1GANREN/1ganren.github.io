@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простая установка ME системы для ComputerCraft</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #4b7bec;
+            --secondary: #3867d6;
+            --accent: #ff9f43;
+            --dark: #1e272e;
+            --darker: #0c2461;
+            --success: #20bf6b;
+            --danger: #eb3b5a;
+            --text: #f1f2f6;
+            --minecraft-dark: #3b3b3b;
+            --minecraft-green: #78e08f;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: rgba(30, 39, 46, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 159, 67, 0.3);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .logo i {
+            font-size: 3.5rem;
+            color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(to right, var(--accent), var(--minecraft-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            margin: 20px auto;
+            color: #d1d8e0;
+            max-width: 800px;
+            line-height: 1.7;
+        }
+        
+        .highlight {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(30, 39, 46, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 159, 67, 0.3);
+        }
+        
+        .card-header i {
+            font-size: 2.5rem;
+            color: var(--accent);
+        }
+        
+        .card h2 {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+        
+        .card-content {
+            flex-grow: 1;
+            margin-bottom: 25px;
+        }
+        
+        .step {
+            background: rgba(56, 103, 214, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .command {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            overflow-x: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .download-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(75, 123, 236, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(75, 123, 236, 0.6);
+            background: var(--secondary);
+        }
+        
+        .notes {
+            background: rgba(255, 159, 67, 0.15);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .notes h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .server-diagram {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px dashed var(--accent);
+        }
+        
+        .diagram-title {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .diagram-content {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .diagram-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .diagram-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .arrow {
+            font-size: 2rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            color: #a5b1c2;
+            font-size: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 39, 46, 0.7);
+            border-radius: 15px;
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .card {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.3s; }
+        .card:nth-child(3) { animation-delay: 0.5s; }
+        
+        @media (max-width: 768px) {
+            .cards-container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-cubes"></i>
+                <h1>Установка ME системы для ComputerCraft</h1>
+            </div>
+            <p class="subtitle">
+                Всё стало проще: теперь оба файла называются <span class="highlight">ui.lua</span> для удобства установки
+            </p>
+            <p class="subtitle">
+                Просто выполните команды для своего компьютера и наслаждайтесь мощной системой хранения!
+            </p>
+        </header>
+        
+        <div class="cards-container">
+            <!-- Серверная часть -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-server"></i>
+                    <h2>Центральный Сервер</h2>
+                </div>
+                <div class="card-content">
+                    <p>Установите на главном компьютере, который управляет хранилищем:</p>
+                    
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        Подключите модем и сундуки
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        Выполните в терминале:
+                    </div>
+                    
+                    <div class="command">
+                        wget https://1ganren.github.io/ComputerCraft/ME/server/ui.lua ui.lua
+                        <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        Запустите систему:
+                    </div>
+                    
+                    <div class="command">
+                        ui
+                        <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    </div>
+                    
+                    <div class="notes">
+                        <h3><i class="fas fa-lightbulb"></i> Важно!</h3>
+                        <p>Файл автоматически сохранится как <strong>ui.lua</strong></p>
+                    </div>
+                    
+                    <div class="server-diagram">
+                        <div class="diagram-title">Схема подключения сервера</div>
+                        <div class="diagram-content">
+                            <div class="diagram-item">
+                                <div class="diagram-icon"><i class="fas fa-computer"></i></div>
+                                <div>Компьютер</div>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="diagram-item">
+                                <div class="diagram-icon"><i class="fas fa-wifi"></i></div>
+                                <div>Модем</div>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="diagram-item">
+                                <div class="diagram-icon"><i class="fas fa-box"></i></div>
+                                <div>Сундуки</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="https://1ganren.github.io/ComputerCraft/ME/server/ui.lua" class="download-btn">
+                    <i class="fas fa-download"></i> Скачать для сервера
+                </a>
+            </div>
+            
+            <!-- Клиентская часть -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-terminal"></i>
+                    <h2>Терминал доступа</h2>
+                </div>
+                <div class="card-content">
+                    <p>Установите на компьютерах, с которых нужен доступ к хранилищу:</p>
+                    
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        Подключите беспроводной модем
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        Выполните в терминале:
+                    </div>
+                    
+                    <div class="command">
+                        wget https://1ganren.github.io/ComputerCraft/ME/terminal/ui.lua ui.lua
+                        <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        Запустите систему:
+                    </div>
+                    
+                    <div class="command">
+                        ui
+                        <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    </div>
+                    
+                    <div class="notes">
+                        <h3><i class="fas fa-lightbulb"></i> Подсказка</h3>
+                        <p>Система автоматически найдёт сервер в сети</p>
+                    </div>
+                    
+                    <div class="server-diagram">
+                        <div class="diagram-title">Схема подключения терминала</div>
+                        <div class="diagram-content">
+                            <div class="diagram-item">
+                                <div class="diagram-icon"><i class="fas fa-laptop"></i></div>
+                                <div>Терминал</div>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="diagram-item">
+                                <div class="diagram-icon"><i class="fas fa-wifi"></i></div>
+                                <div>Модем</div>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="diagram-item">
+                                <div class="diagram-icon"><i class="fas fa-server"></i></div>
+                                <div>Сервер</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="https://1ganren.github.io/ComputerCraft/ME/terminal/ui.lua" class="download-btn">
+                    <i class="fas fa-download"></i> Скачать для терминала
+                </a>
+            </div>
+            
+            <!-- Инструкция по использованию -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-book"></i>
+                    <h2>Использование системы</h2>
+                </div>
+                <div class="card-content">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <strong>Сброс предметов:</strong> Поместите предметы в Dump Chest
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <strong>Получение предметов:</strong> Забирайте из Pickup Chest
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <strong>Поиск:</strong> Вводите название предмета в интерфейсе
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <strong>Извлечение:</strong> Нажимайте 1-9 для выбора предмета
+                    </div>
+                    
+                    <div class="notes">
+                        <h3><i class="fas fa-keyboard"></i> Горячие клавиши</h3>
+                        <p>Tab - очистка сундуков</p>
+                        <p>Enter - обновление инвентаря</p>
+                        <p>Ctrl+T - экстренная остановка</p>
+                    </div>
+                    
+                    <div class="notes" style="background: rgba(32, 191, 107, 0.15); border-color: var(--success);">
+                        <h3><i class="fas fa-rocket"></i> Советы</h3>
+                        <p>• Используйте бочки для массового хранения</p>
+                        <p>• Подключайте до 20 сундуков к серверу</p>
+                        <p>• Advanced модемы увеличивают радиус действия</p>
+                        <p>• Регулярно очищайте Dump и Pickup сундуки</p>
+                    </div>
+                </div>
+                
+                <a href="#" class="download-btn" style="background: var(--success);" onclick="showCommands()">
+                    <i class="fas fa-terminal"></i> Показать все команды
+                </a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>ME Система для ComputerCraft | Версия 3.0 | Упрощённая установка</p>
+            <p>Все файлы называются ui.lua для вашего удобства</p>
+            <p>© 2023 Проект автоматизированного хранения ресурсов</p>
+        </footer>
+    </div>
+
+    <script>
+        // Функция копирования кода
+        function copyCode(button) {
+            const commandBlock = button.parentElement;
+            const text = commandBlock.textContent.replace('Копировать', '').trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                
+                // Анимация
+                button.style.backgroundColor = '#20bf6b';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.backgroundColor = '';
+                }, 2000);
+            });
+        }
+        
+        // Показать команды
+        function showCommands() {
+            alert('Основные команды:\n\n' +
+                  'Сервер:\n' +
+                  '  Установка: wget https://1ganren.github.io/ComputerCraft/ME/server/ui.lua ui.lua\n' +
+                  '  Запуск: ui\n\n' +
+                  'Терминал:\n' +
+                  '  Установка: wget https://1ganren.github.io/ComputerCraft/ME/terminal/ui.lua ui.lua\n' +
+                  '  Запуск: ui');
+        }
+        
+        // Анимация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+            });
+            
+            setTimeout(() => {
+                cards.forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                    card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>
