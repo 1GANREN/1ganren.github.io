@@ -1,6 +1,5 @@
 -- Save as: autocraft.lua
 -- Usage: autocraft <item> [count]
--- Example: autocraft minecraft:iron_ingot 5
 
 local args = { ... }
 local itemName = args[1]
@@ -13,15 +12,17 @@ if not itemName then
 end
 
 -- Find connected turtle
+local turtlePeripheral
 local turtleID
 for _, name in ipairs(peripheral.getNames()) do
     if peripheral.getType(name) == "turtle" then
         turtleID = name
+        turtlePeripheral = peripheral.wrap(name)
         break
     end
 end
 
-if not turtleID then
+if not turtleID or not turtlePeripheral then
     print("Error: No connected turtle found")
     return
 end
@@ -44,42 +45,51 @@ if #chests == 0 then
     return
 end
 
--- Get recipe from turtle
-local command = string.format([[
-    local recipe = turtle.getRecipe("%s")
-    if not recipe then
-        return false, "Recipe not found"
+-- Function to get recipe using turtle's own function
+local function getTurtleRecipe(item)
+    -- Move to turtle and execute getRecipe locally
+    local command = "return turtle.getRecipe('"..item.."') ~= nil"
+    local success, result = turtlePeripheral.executeCommand(command)
+    
+    if not success then
+        return nil, "Failed to get recipe from turtle"
     end
     
-    local result = {}
-    for slot = 1, 9 do
-        local item = recipe[slot]
-        if item then
-            table.insert(result, {
-                name = item.name,
-                count = item.count
-            })
+    -- Get the actual recipe data
+    local recipeCommand = [[
+        local recipe = turtle.getRecipe(']]..item..[[')
+        if not recipe then return nil end
+        
+        local result = {}
+        for slot = 1, 9 do
+            local item = recipe[slot]
+            if item then
+                table.insert(result, {
+                    name = item.name,
+                    count = item.count
+                })
+            end
         end
+        return result
+    ]]
+    
+    local recipeSuccess, recipeData = turtlePeripheral.executeCommand(recipeCommand)
+    if not recipeSuccess then
+        return nil, "Recipe not found for "..item
     end
     
-    return true, textutils.serialize(result)
-]], itemName)
-
-local success, recipeData = commands.exec(turtleID, "lua", "-e", command)
-
-if not success then
-    print("Error: " .. tostring(recipeData))
-    return
+    return recipeData
 end
 
-local recipeItems = textutils.unserialize(recipeData)
+-- Get recipe
+local recipeItems, err = getTurtleRecipe(itemName)
 if not recipeItems then
-    print("Error: Failed to parse recipe data")
+    print("Error: "..err)
     return
 end
 
 if #recipeItems == 0 then
-    print("Error: Empty recipe for " .. itemName)
+    print("Error: Empty recipe for "..itemName)
     return
 end
 
@@ -129,8 +139,8 @@ for item, needCount in pairs(ingredients) do
 end
 
 -- Perform crafting
-local craftCommand = string.format("turtle.craft(%d)", craftCount)
-local craftSuccess, craftResponse = commands.exec(turtleID, craftCommand)
+local craftCommand = "return turtle.craft("..craftCount..")"
+local craftSuccess, craftResponse = turtlePeripheral.executeCommand(craftCommand)
 
 if craftSuccess then
     print(("Successfully crafted %dx %s"):format(craftCount, itemName))
