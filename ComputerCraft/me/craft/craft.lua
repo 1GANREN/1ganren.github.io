@@ -1,5 +1,5 @@
--- AUTOCRAFT TURTLE v2.0
--- Listens for craft requests and executes them
+-- AUTOCRAFT TURTLE v2.1 (FIXED)
+-- Listens for craft requests with better item handling
 
 local modemSide = "back" -- Modem side on turtle
 
@@ -13,9 +13,9 @@ end
 modem.open(123)
 print("Turtle ready. Waiting for commands...")
 
--- Helper: Pull items from chests
+-- Helper: Pull items from chests (IMPROVED)
 local function pullItems(itemName, needed)
-    -- Check turtle's inventory first
+    -- 1. Check turtle's inventory first
     for slot=1,16 do
         local item = turtle.getItemDetail(slot)
         if item and item.name == itemName then
@@ -24,31 +24,44 @@ local function pullItems(itemName, needed)
         end
     end
     
-    -- Search connected chests
+    -- 2. Search connected chests (WITH DEBUG)
+    print("Searching chests for: "..itemName)
+    local foundAny = false
+    
     for _,side in pairs(peripheral.getNames()) do
         if peripheral.hasType(side, "inventory") then
+            print(" - Checking inventory: "..side)
             local inv = peripheral.wrap(side)
-            for slot=1,inv.size() do
+            local size = inv.size()
+            
+            for slot=1,size do
                 local item = inv.getItemDetail(slot)
-                if item and item.name == itemName then
-                    local toPull = math.min(item.count, needed)
-                    turtle.pullItems(side, slot, toPull)
-                    needed = needed - toPull
-                    if needed <= 0 then return true end
+                if item then
+                    print("   Slot "..slot..": "..item.name.." x"..item.count)
+                    if item.name == itemName then
+                        local toPull = math.min(item.count, needed)
+                        print("   FOUND! Pulling "..toPull.." from "..side)
+                        turtle.pullItems(side, slot, toPull)
+                        needed = needed - toPull
+                        if needed <= 0 then return true end
+                        foundAny = true
+                    end
                 end
             end
         end
     end
-    return false
+    
+    print("Search complete. Still need: "..needed)
+    return false, foundAny
 end
 
 -- Helper: Prepare crafting and execute
 local function craftItem()
     -- Clear selection for crafting
+    turtle.select(1)
     for i=1,16 do
-        turtle.select(i)
-        if not turtle.getItemDetail() then
-            break
+        if turtle.getItemCount(i) > 0 then
+            turtle.select(i)
         end
     end
     return turtle.craft()
@@ -61,7 +74,8 @@ while true do
         local item = msg.item
         print("Received craft request: "..item)
         
-        if pullItems(item, 1) then
+        local success, foundItems = pullItems(item, 1)
+        if success then
             print("Crafting "..item)
             if craftItem() then
                 print("Crafting successful!")
@@ -69,7 +83,11 @@ while true do
                 print("Crafting failed - check recipe")
             end
         else
-            print("Not enough resources for "..item)
+            if foundItems then
+                print("Partial resources found but not enough")
+            else
+                print("No resources found for "..item)
+            end
         end
     end
 end
