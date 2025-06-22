@@ -1,28 +1,215 @@
 -- recommend each chest only touching at most 1 modem
 -- recommend flat wired modem for computer
+term.clear()
 print("welcome ccME")
 sleep(3)
-clear
+term.clear()
 -- specify name of dump chest and pickup chest (all other chests connected to modem network will be used as storage)
 local DUMP_CHEST_NAME = "minecraft:chest_2"
 local PICKUP_CHEST_NAME = "minecraft:chest_3"
 
+local TURTLE_NAME = "turtle_0"  
+
 local tArgs = {...}
 local width, height = term.getSize()
 
+
 if #tArgs > 0 then
-  shell.run("clear")
-  print("type to find items")
-  print("press 1-9 to get that item")
-  print("press tab to clear pickup/dropoff chests")
-  error()
+  if tArgs[1] == "auto" then
+    if #tArgs < 2 then
+      print("Usage: auto <item_name>")
+      return
+    end
+    
+    
+    local function startup()
+      term.clear()
+      term.setCursorPos(1,1)
+      print("Initializing system...")
+      
+      -- helper functions --
+      function all(tbl)
+        local prev_k = nil
+        return function()
+          local k,v = next(tbl, prev_k)
+          prev_k = k
+          return v
+        end
+      end
+      
+      function inc_tbl(tbl, key, val)
+        assert(key, "key cannot be false or nil")
+        val = val or 1
+        if not tbl[key] then
+          tbl[key] = 0
+        end
+        tbl[key] = tbl[key] + val
+      end
+      
+      local function beginsWith(string, beginning)
+        return string:sub(1,#beginning) == beginning
+      end
+      
+      function forEach(tbl, func)
+        for val in all(tbl) do
+          func(val)
+        end
+      end
+      
+      -- silo singleton code --
+      silo = {
+        dict = {},
+        chest_names = {},
+        dump_chest = DUMP_CHEST_NAME,
+        pickup_chest = PICKUP_CHEST_NAME,
+      }
+      
+      -- scan through all connected chests and add to table
+      function silo.find_chests()
+        silo.chest_names = {}
+        for _, name in ipairs(peripheral.getNames()) do
+          if beginsWith(name, "minecraft:chest") and name ~= silo.dump_chest and name ~= silo.pickup_chest then
+            table.insert(silo.chest_names, name)
+          end
+        end
+      end
+      
+      -- add the item to the record
+      function silo.add(item)
+        inc_tbl(silo.dict, item.name, item.count)
+      end
+      
+      -- scan through all invos and put into dict
+      function silo.update_all_items()
+        silo.dict = {}
+        for _, name in ipairs(silo.chest_names) do
+          silo.update(name)
+        end
+      end
+      
+      function silo.update(target)
+        local items = peripheral.call(target, "list")
+        if items then
+          for _, item in pairs(items) do
+            silo.add(item)
+          end
+        end
+      end
+      
+      function silo.grab(chest_name, slot, stack_size)
+        peripheral.call(silo.pickup_chest, "pullItems", chest_name, slot, stack_size)
+      end
+      
+      -- go through all items and take the specified item until count rem <= 0
+      function silo.get_item(item_name, count)
+        local rem = count
+        item_name = item_name:lower()
+        for _, chest_name in ipairs(silo.chest_names) do
+          local items = peripheral.call(chest_name, "list")
+          if items then
+            for slot, item in pairs(items) do
+              if item.name:lower():find(item_name, 1, true) then
+                local amount = math.min(item.count, rem)
+                silo.grab(chest_name, slot, amount)
+                rem = rem - amount
+                if rem <= 0 then
+                  return
+                end
+              end
+            end
+          end
+        end
+      end
+      
+      -- try to suck the slot of dump chest with storage chests
+      function silo.try_to_dump(slot, count, target)
+        target = target or silo.dump_chest
+        for _, chest_name in ipairs(silo.chest_names) do
+          local num = peripheral.call(target, "pushItems", chest_name, slot, count)
+          if num >= count then
+            return true
+          end
+        end
+        return false
+      end
+      
+      -- for all storage chest try to suck everythin in the dump chest
+      function silo.dump(target)
+        target = target or silo.dump_chest
+        local suck_this = peripheral.call(target, "list")
+        if suck_this then
+          for slot, item in pairs(suck_this) do
+            if not silo.try_to_dump(slot, item.count, target) then
+              return false
+            end
+          end
+        end
+        return true
+      end
+      
+      function silo.startup()
+        silo.find_chests()
+        silo.update_all_items()
+        
+        
+        if peripheral.isPresent(TURTLE_NAME) then
+          print("Turtle connected: "..TURTLE_NAME)
+        else
+          print("Turtle not found: "..TURTLE_NAME)
+        end
+      end
+      
+      silo.startup()
+    end
+    
+    startup()
+    
+    
+    print("Clearing pickup chest...")
+    silo.dump(silo.pickup_chest)
+    
+    
+    local item_name = table.concat(tArgs, " ", 2)
+    print("Fetching: "..item_name)
+    silo.get_item(item_name, 64)
+    
+    
+    print("Transferring to turtle...")
+    local pickup = peripheral.wrap(silo.pickup_chest)
+    if pickup then
+      local items = pickup.list()
+      local transferred = false
+      
+      for slot, item in pairs(items) do
+        if item.name:lower():find(item_name:lower(), 1, true) then
+          
+          local turtle = peripheral.wrap(TURTLE_NAME)
+          if turtle then
+            turtle.pullItems(peripheral.getName(pickup), slot, item.count)
+            print(("Transferred %dx %s to turtle"):format(item.count, item.name))
+            transferred = true
+          else
+            print("Turtle not found: "..TURTLE_NAME)
+          end
+        end
+      end
+      
+      if not transferred then
+        print("No items found for transfer")
+      end
+    else
+      print("Pickup chest not found")
+    end
+    return
+  else
+    shell.run("clear")
+    print("type to find items")
+    print("press 1-9 to get that item")
+    print("press tab to clear pickup/dropoff chests")
+    print("Use: auto <item_name> to send items to turtle")
+    error()
+  end
 end
-
--- Имя периферии черепашки
-local TURTLE_PERIPHERAL_NAME = "minecraft:turtle"
-
--- Программирование интерфейса с черепашкой
-peripheral.attach(TURTLE_PERIPHERAL_NAME)
 
 -- helper functions --
 function all(tbl)
@@ -61,87 +248,93 @@ function t2f(tbl, filename)
   shell.run("edit "..tostring(filename))
 end
 
+
 -- silo singleton code --
-local silo = {
+silo = {
   dict = {},
   chest_names = {},
   dump_chest = DUMP_CHEST_NAME,
   pickup_chest = PICKUP_CHEST_NAME,
 }
 
--- сканирует подключённые сундуки и добавляет их в таблицу
+-- scan through all connected chests and add to table
 function silo.find_chests()
   silo.chest_names = {}
-  for name in all(peripheral.getNames()) do
+  for _, name in ipairs(peripheral.getNames()) do
     if beginsWith(name, "minecraft:chest") and name ~= silo.dump_chest and name ~= silo.pickup_chest then
       table.insert(silo.chest_names, name)
     end
   end
 end
 
--- добавляет элемент в запись
+-- add the item to the record
 function silo.add(item)
   inc_tbl(silo.dict, item.name, item.count)
 end
 
--- сканирует содержимое сундуков и заносит всё в словарь
+-- scan through all invos and put into dict
 function silo.update_all_items()
   silo.dict = {}
-  for name in all(silo.chest_names) do
+  for _, name in ipairs(silo.chest_names) do
     silo.update(name)
   end
 end
 
 function silo.update(target)
   local items = peripheral.call(target, "list")
-  forEach(items, function(item) silo.add(item) end)
-end
-
-function silo.startup()
-  silo.find_chests()
+  if items then
+    for _, item in pairs(items) do
+      silo.add(item)
+    end
+  end
 end
 
 function silo.grab(chest_name, slot, stack_size)
   peripheral.call(silo.pickup_chest, "pullItems", chest_name, slot, stack_size)
 end
 
--- получение указанного элемента до тех пор, пока счётчик не достигнет нуля
+-- go through all items and take the specified item until count rem <= 0
 function silo.get_item(item_name, count)
   local rem = count
   item_name = item_name:lower()
-  for chest_name in all(silo.chest_names) do
+  for _, chest_name in ipairs(silo.chest_names) do
     local items = peripheral.call(chest_name, "list")
-    for i,item in pairs(items) do
-      if item.name:find(item_name) then
-        local amount = math.min(64, rem)
-        silo.grab(chest_name, i, amount)
-        rem = rem - amount
-        if rem <= 0 then
-          break
+    if items then
+      for slot, item in pairs(items) do
+        if item.name:lower():find(item_name, 1, true) then
+          local amount = math.min(item.count, rem)
+          silo.grab(chest_name, slot, amount)
+          rem = rem - amount
+          if rem <= 0 then
+            return
+          end
         end
       end
     end
   end
 end
 
--- перекладывание содержимого из сундука выгрузки в другие сундуки
+-- try to suck the slot of dump chest with storage chests
 function silo.try_to_dump(slot, count, target)
   target = target or silo.dump_chest
-  for chest_name in all(silo.chest_names) do
+  for _, chest_name in ipairs(silo.chest_names) do
     local num = peripheral.call(target, "pushItems", chest_name, slot, count)
     if num >= count then
       return true
     end
   end
+  return false
 end
 
--- очищает весь сундук выгрузки
+-- for all storage chest try to suck everythin in the dump chest
 function silo.dump(target)
   target = target or silo.dump_chest
   local suck_this = peripheral.call(target, "list")
-  for k,v in pairs(suck_this) do
-    if not silo.try_to_dump(k,v.count,target) then
-      return false
+  if suck_this then
+    for slot, item in pairs(suck_this) do
+      if not silo.try_to_dump(slot, item.count, target) then
+        return false
+      end
     end
   end
   return true
@@ -149,9 +342,15 @@ end
 
 function silo.search(item_name)
   item_name = item_name:lower()
-  for name in all(silo.chest_names) do
+  for _, name in ipairs(silo.chest_names) do
     local items = peripheral.call(name, "list")
-    forEach(items, function(item) if item.name:find(item_name) then silo.add(item) end end)
+    if items then
+      for _, item in pairs(items) do
+        if item.name:lower():find(item_name, 1, true) then
+          silo.add(item)
+        end
+      end
+    end
   end
 end
 
@@ -160,127 +359,105 @@ function silo.get_capacity()
   local used_slots = 0
   local used_items = 0
 
-  for name in all(silo.chest_names) do
+  for _, name in ipairs(silo.chest_names) do
     total_slots = total_slots + peripheral.call(name, "size")
     local items = peripheral.call(name, "list")
-    used_slots = used_slots + #items
-    forEach(items, function(item) used_items = used_items + item.count end)
+    if items then
+      used_slots = used_slots + #items
+      for _, item in pairs(items) do
+        used_items = used_items + item.count
+      end
+    end
   end
 
   print("slots used ".. tostring(used_slots) .. "/" .. tostring(total_slots))
   print("items stored "..tostring(used_items) .. "/" .. tostring(total_slots*64))
 end
 
--- Вспомогательные функции для работы с черепашкой
+function startup()
+  term.clear()
+  term.setCursorPos(1,1)
+  term.write("Search: ")
+  term.setCursorBlink(true)
 
--- Проверка наличия достаточных ресурсов
-function checkMaterials(recipe)
-    for material, amount in pairs(recipe) do
-        local currentStock = silo.dict[material] or 0
-        if currentStock < amount then
-            return false
-        end
-    end
-    return true
+  silo.startup()
+  silo.update_all_items()
 end
 
--- Функция для подготовки ресурсов
-function prepareIngredientsForCrafting(recipe)
-    for material, amount in pairs(recipe) do
-        silo.get_item(material, amount)
-    end
+function backspace(num)
+  num = num or 1
+  local x, y = term.getCursorPos()
+  if x - num <= 8 then
+    return
+  end
+  term.setCursorPos(x - num, y)
+  for _ = 1, num do
+    term.write(" ")
+  end
+  term.setCursorPos(x - num, y)
 end
 
--- Отправка ресурсов в инвентарь черепашки
-function transferToTurtle(recipe)
-    for material, amount in pairs(recipe) do
-        -- Ищем подходящий сундук с нужным материалом
-        local sourceChest = nil
-        for _, chestName in ipairs(silo.chest_names) do
-            local items = peripheral.call(chestName, "list")
-            for slot, item in pairs(items) do
-                if item.name == material then
-                    sourceChest = {name = chestName, slot = slot}
-                    break
-                end
-            end
-            if sourceChest then break end
-        end
-        
-        if sourceChest then
-            -- Перемещение материала в инвентарь черепашки
-            local transferred = peripheral.call(sourceChest.name, "transferTo", TURTLE_PERIPHERAL_NAME, sourceChest.slot, amount)
-            if not transferred then
-                notify("Ошибка переноса материала: " .. material)
-                return false
-            end
-        else
-            notify("Материал не найден: " .. material)
-            return false
-        end
-    end
-    return true
+function printWord(word)
+  local x,y = term.getCursorPos()
+  term.setCursorPos(1,y+1)
+  term.clearLine()
+  term.write("word: "..word)
+  term.setCursorPos(x,y)
 end
 
--- Расположение ресурсов в инвентаре черепашки
-function arrangeIngredientsInTurtleSlots(recipe)
-    -- перебор инвентаря черепашки и заполнение нужных слотов
-    local inventory = peripheral.call(TURTLE_PERIPHERAL_NAME, "inventory")
-    for slot, resourceData in pairs(inventory) do
-        if resourceData.name == recipe["wood"] then
-            -- помещаем дерево в первый слот
-            peripheral.call(TURTLE_PERIPHERAL_NAME, "select", slot)
-            peripheral.call(TURTLE_PERIPHERAL_NAME, "move", 1)
-        end
-    end
+function notify(msg)
+  local x,y = term.getCursorPos()
+  term.setCursorPos(1,height)
+  term.clearLine()
+  term.write(msg)
+  term.setCursorPos(x,y)
 end
 
--- Автоматический крафт
-function autoCraft(recipe, quantity)
-    -- обновление запасов
-    silo.update_all_items()
-    
-    -- проверка наличия ресурсов
-    if not checkMaterials(recipe) then
-        notify("Нехватка ресурсов для крафта.")
-        return false
-    end
-    
-    -- сборка ресурсов
-    prepareIngredientsForCrafting(recipe)
-    
-    -- перемещение ресурсов в инвентарь черепашки
-    if not transferToTurtle(recipe) then
-        notify("Ошибка передачи ресурсов черепашке.")
-        return false
-    end
-    
-    -- расположение ресурсов в нужных слотах черепашки
-    arrangeIngredientsInTurtleSlots(recipe)
-    
-    -- запускаем крафт
-    peripheral.call(TURTLE_PERIPHERAL_NAME, "craft")
-    
-    -- ожидание завершения крафта
-    os.sleep(5)
-    
-    -- возвращаем готовую продукцию обратно в сундук
-    local finishedProduct = recipe.result
-    silo.get_item(finishedProduct, quantity * recipe.amount)
-    
-    notify("Автоматический крафт завершён успешно!")
-    return true
+function clearUnderSearch()
+  local x,y = term.getCursorPos()
+  for i=2,height do
+    term.setCursorPos(1,i)
+    term.clearLine()
+  end
+  term.setCursorPos(x,y)
 end
 
--- Пример рецепта для палочек
-local stickRecipe = {
-    wood = "minecraft:planks",
-    sticks = "minecraft:stick",
-    result = "minecraft:stick",
-    amount = 4 -- один рецепт даёт 4 палочки
-}
+function listItems(word)
+  clearUnderSearch()
+  local x,y = term.getCursorPos()
+  local line = 1
+  local itemChoices = {}
+  word = word:lower()
+  
+  for item, count in pairs(silo.dict) do
+    if item:lower():find(word, 1, true) then
+      if line >= height-2 then
+        term.setCursorPos(x,y)
+        return itemChoices
+      end
+      term.setCursorPos(1,y+line)
+      term.write(("%i) %ix %s"):format(line, count, item))
+      itemChoices[line] = item
+      line = line + 1
+    end
+  end
+  
+  term.setCursorPos(x,y)
+  return itemChoices
+end
 
--- Основной цикл программы остаётся таким же
+function silo.startup()
+  silo.find_chests()
+  silo.update_all_items()
+  
+
+  if peripheral.isPresent(TURTLE_NAME) then
+    print("Turtle connected: "..TURTLE_NAME)
+  else
+    print("Turtle not found: "..TURTLE_NAME)
+  end
+end
+
 startup()
 
 local word = ""
