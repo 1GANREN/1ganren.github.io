@@ -1,0 +1,44 @@
+function turtleListener()
+    local modemSide = "left" -- замените на сторону, где у вас модем
+    rednet.open(modemSide)
+    print("turtleListener активен. Ожидаю команд...")
+
+    while true do
+        local senderID, message = rednet.receive()
+        print("Получено от "..senderID..": "..tostring(message))
+
+        if message == "forward" then
+            turtle.forward()
+        elseif message == "back" then
+            turtle.back()
+        elseif message == "up" then
+            turtle.up()
+        elseif message == "down" then
+            turtle.down()
+        elseif message == "turnLeft" then
+            turtle.turnLeft()
+        elseif message == "turnRight" then
+            turtle.turnRight()
+        elseif message == "dig" then
+            turtle.dig()
+        elseif message == "digUp" then
+            turtle.digUp()
+        elseif message == "digDown" then
+            turtle.digDown()
+        elseif message == "place" then
+            turtle.place()
+        elseif message == "placeUp" then
+            turtle.placeUp()
+        elseif message == "placeDown" then
+            turtle.placeDown()
+        elseif message == "stop" then
+            print("Получена команда стоп, завершаю работу.")
+            break
+        else
+            print("Неизвестная команда: "..tostring(message))
+        end
+    end
+
+    rednet.close(modemSide)
+    print("turtleListener остановлен.")
+end
