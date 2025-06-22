@@ -1,8 +1,9 @@
 -- recommend each chest only touching at most 1 modem
 -- recommend flat wired modem for computer
+term.clear()
 print("welcome ccME")
 sleep(3)
-clear
+term.clear
 -- specify name of dump chest and pickup chest (all other chests connected to modem network will be used as storage)
 local DUMP_CHEST_NAME = "minecraft:chest_2"
 local PICKUP_CHEST_NAME = "minecraft:chest_3"
