@@ -1,111 +1,216 @@
--- ... existing code ...
+-- Рекомендации по настройке:
+-- Каждый сундук должен касаться максимум 1 модема
+-- Используйте плоский проводной модем для подключения к компьютеру
 
-function silo.get_item(item_name, count, dest)
-    local rem = count
-    dest = dest or silo.pickup_chest
+-- Укажите имена сундуков для сброса и выдачи (остальные сундуки будут использоваться как хранилище)
+local DUMP_CHEST_NAME = "minecraft:chest_2"  -- Сундук для сброса предметов
+local PICKUP_CHEST_NAME = "minecraft:chest_3"  -- Сундук для выдачи предметов
 
-    -- Handle missing items gracefully
-    if not silo.loc[item_name] then
-        if rem > 0 then
-            error(("Need %i more %s"):format(rem, item_name), 0)
-        end
-        return
-    end
+local tArgs = {...}
+local width, height = term.getSize()  -- Получаем размеры терминала
 
-    local sources = silo.loc[item_name]
-    while #sources > 0 and rem > 0 do
-        local stack_size = table.remove(sources)
-        local slot = table.remove(sources)
-        local perf_index = table.remove(sources)
-        local perf_name = silo.get_peripheral_name(perf_index)
-        
-        -- Get actual transfer amount
-        local amount = math.min(stack_size, 64, rem)
-        local actual = peripheral.call(perf_name, "pushItems", dest, slot, amount)
-        
-        -- Update counts with actual transferred amount
-        stack_size = stack_size - actual
-        rem = rem - actual
-        silo.dict[item_name] = (silo.dict[item_name] or 0) - actual
-
-        -- Return unused portion to sources
-        if stack_size > 0 then
-            table.insert(sources, perf_index)
-            table.insert(sources, slot)
-            table.insert(sources, stack_size)
-        end
-    end
-
-    -- Clean up empty sources
-    if #sources == 0 then
-        silo.loc[item_name] = nil
-    end
-
-    -- Handle depleted items
-    if silo.dict[item_name] and silo.dict[item_name] <= 0 then
-        if not silo.recipes[item_name] then
-            silo.dict[item_name] = nil
-        else
-            silo.dict[item_name] = 0
-        end
-    end
-
-    if rem > 0 then
-        error(("Need %i more %s"):format(rem, item_name), 0)
-    end
+if #tArgs > 0 then
+  shell.run("clear")
+  print("Введите текст для поиска предметов")
+  print("Нажмите 1-9 для выбора предмета")
+  print("Нажмите Tab для очистки сундуков выдачи/сброса")
+  error()
 end
 
+-- Вспомогательные функции --
+function all(tbl) 
+  local prev_k = nil
+  return function()
+    local k,v = next(tbl, prev_k)
+    prev_k = k
+    return v
+  end
+end
+
+-- Увеличение значения в таблице
+function inc_tbl(tbl, key, val)
+  assert(key, "Ключ не может быть false или nil")
+  val = val or 1
+  if not tbl[key] then
+    tbl[key] = 0
+  end
+  tbl[key] = tbl[key] + val
+end
+
+-- Проверка начала строки
+local function beginsWith(string, beginning)
+  return string:sub(1,#beginning) == beginning
+end
+
+-- Применение функции к каждому элементу таблицы
+function forEach(tbl, func)
+  for val in all(tbl) do
+    func(val)
+  end
+end
+
+-- Основной объект хранилища
+local silo = {
+  dict = {},        -- Словарь предметов и их количества
+  recipes = {},     -- Рецепты крафта
+  loc = {},         -- Расположение предметов
+  perf_cache = {},  -- Кэш периферийных устройств
+  chest_names = {}, -- Имена сундуков
+  show_crafts = true, -- Показывать крафт
+  dump_chest = DUMP_CHEST_NAME,  -- Сундук сброса
+  pickup_chest = PICKUP_CHEST_NAME, -- Сундук выдачи
+}
+
+-- Поиск всех подключенных сундуков
+function silo.find_chests()
+  silo.chest_names = {}
+  for name in all(peripheral.getNames()) do
+    if (beginsWith(name, "chest") or beginsWith(name, "ironchest")) and name ~= silo.dump_chest and name ~= silo.pickup_chest then
+      table.insert(silo.chest_names, name)
+    end
+  end
+end
+
+-- Добавление предмета в словарь
+function silo.add(item)
+  inc_tbl(silo.dict, item.name, item.count)
+end
+
+-- Добавление информации о местоположении предмета
+function silo.add_loc(item, target, slot)
+  if not silo.loc[item.name] then
+    silo.loc[item.name] = {}
+  end
+  local index = silo.get_peripheral_index(target)
+  table.insert(silo.loc[item.name], index)
+  table.insert(silo.loc[item.name], slot)
+  table.insert(silo.loc[item.name], item.count)
+end
+
+-- Обновление информации о всех предметах
 function silo.update_all_items()
-    -- PROPERLY reset dictionaries
-    silo.dict = {}
-    silo.loc = {}
-    for name in all(silo.chest_names) do
-        silo.update(name)
-    end
+  silo.dict = {}
+  silo.loc = {}
+  for name in all(silo.chest_names) do
+    silo.update(name)
+  end
 end
 
-function silo.load_recipes()
-    for _, file in pairs(fs.list("patterns")) do
-        if file:sub(-4) == ".lua" then  -- Only load Lua files
-            local fileRoot = file:sub(1, -5)
-            local success, nameYieldItemCount = pcall(function()
-                return require("patterns/" .. fileRoot)
-            end)
-            
-            if not success then
-                printError("Failed to load pattern: " .. file)
-                printError(nameYieldItemCount)  -- Error message
-            else
-                for name, yieldItemCount in pairs(nameYieldItemCount) do
-                    table.insert(yieldItemCount, silo.get_peripheral_index(fileRoot))
-                    silo.recipes[name] = yieldItemCount
-                    if not silo.dict[name] then
-                        silo.dict[name] = 0
-                    end
-                end
-            end
-        end
-    end
+-- Обновление информации о предметах в конкретном сундуке
+function silo.update(target)
+  local items = peripheral.call(target, "list")
+  for i, item in pairs(items) do
+    silo.add(item)
+    silo.add_loc(item, target, i)
+  end
 end
 
--- ... in main loop crafting section ...
-notify(("crafting %i %s"):format(num, item))
-silo.craft(item, num)
-notify(("crafted %i %s"):format(num, item))  -- Success notification
-sleep(0.5)  -- Allow user to see message
-itemChoices = listItems(word)
-
--- ... UI improvements ...
-function notify(msg)
-    local x, y = term.getCursorPos()
-    -- Clear notification area (last 2 lines)
-    for i = 0, 1 do
-        term.setCursorPos(1, height - i)
-        term.clearLine()
-    end
-    term.setCursorPos(1, height - 1)
-    term.write(msg)
-    term.setCursorPos(x, y)
+-- Инициализация системы
+function silo.startup()
+  silo.find_chests()
 end
 
--- ... removed unused functions ...
+-- Функция переноса предметов
+function silo.grab(chest_name, slot, stack_size)
+  peripheral.call(silo.pickup_chest, "pullItems", chest_name, slot, stack_size)
+end
+
+-- Получение предмета из хранилища
+function silo.get_item(item_name, count, dest)  
+  local rem = count
+  dest = dest or silo.pickup_chest
+  
+  if not silo.loc[item_name] then
+    if rem > 0 then
+      error(("Нужно еще %s: %i"):format(item_name, rem), 0)
+    end
+    return
+  end
+
+  -- Логика переноса предметов...
+end
+
+-- Проверка возможности крафта
+function silo.how_many(item_name)
+  local yieldItemCount = silo.recipes[item_name]
+  local craftable = {} 
+  
+  for i = 2,#yieldItemCount-1,2 do
+    local item = yieldItemCount[i]
+    local count = yieldItemCount[i + 1]
+    if not silo.dict[item] then
+      return 0, ("Нужно %s: %i"):format(item, count)
+    end
+    -- Дополнительная логика проверки...
+  end
+  
+  return math.min(unpack(craftable)), "Нужно больше материалов"
+end
+
+-- Выполнение крафта
+function silo.craft(item_name, num)
+  local yieldItemCount = silo.recipes[item_name]
+  assert(yieldItemCount, "Рецепт для "..tostring(item_name).. " не существует")
+  -- Логика крафта...
+end
+
+-- Перенос предметов в хранилище
+function silo.dump(target)
+  target = target or silo.dump_chest
+  local suck_this = peripheral.call(target, "list")
+  for k,v in pairs(suck_this) do
+    if not silo.try_to_dump(k,v.count,target) then
+      return false
+    end
+  end
+  return true
+end
+
+-- Поиск предметов
+function silo.search(item_name)
+  item_name = item_name:lower()
+  for name in all(silo.chest_names) do
+    local items = peripheral.call(name, "list")
+    forEach(items, function(item) if item.name:find(item_name) then silo.add(item) end end)
+  end
+end
+
+-- Проверка заполненности хранилища
+function silo.get_capacity()
+  local total_slots = 0
+  local used_slots = 0
+  local used_items = 0
+  
+  for name in all(silo.chest_names) do
+    total_slots = total_slots + peripheral.call(name, "size")
+    local items = peripheral.call(name, "list")
+    used_slots = used_slots + #items
+    forEach(items, function(item) used_items = used_items + item.count end)
+  end
+  
+  print("Занято слотов: ".. tostring(used_slots) .. "/" .. tostring(total_slots))
+  print("Предметов: "..tostring(used_items) .. "/" .. tostring(total_slots*64))
+end
+
+-- Инициализация программы
+function startup()
+  term.clear()
+  term.setCursorPos(1,1)
+  term.write("Поиск: ")
+  term.setCursorBlink(true)
+  
+  silo.startup()
+  silo.update_all_items()
+  silo.load_recipes()
+end
+
+-- Основной цикл программы
+startup()
+local word = ""
+local itemChoices = listItems(word)
+while true do
+  local event,keyCode,isHeld = os.pullEvent("key")
+  local key = keys.getName(keyCode)
+    
+  -- Обработка ввода пользователя...
+end
