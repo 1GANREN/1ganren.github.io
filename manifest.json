@@ -1,0 +1,11 @@
+{
+    "name": "YouTube PWA",
+    "short_name": "YouTube",
+    "start_url": "/",
+    "display": "standalone",
+    "icons": [{
+        "src": "https://www.google.com/images/youtube_icon_144x144.png",
+        "sizes": "144x144",
+        "type": "image/png"
+    }]
+}
