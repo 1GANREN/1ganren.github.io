@@ -1,16 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=https://www.youtube.com">
-    <title>Redirecting to YouTube...</title>
-    <script>
-        // Instant redirect with JavaScript as fallback
-        window.location.href = "https://www.youtube.com";
-    </script>
+    <title>Перенаправление на YouTube</title>
+    <meta http-equiv="refresh" content="10; url=https://www.youtube.com">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+            padding: 50px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ff0000;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #ff0000;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        a {
+            color: #ff0000;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <p>If you are not redirected automatically, <a href="https://www.youtube.com">click here</a>.</p>
+    <div class="container">
+        <h1>Перенаправление на YouTube</h1>
+        <p>Вы будете автоматически перенаправлены на YouTube через:</p>
+        <div class="countdown" id="countdown">10 секунд</div>
+        <div class="spinner"></div>
+        <p>Если перенаправление не сработало, <a href="https://www.youtube.com">нажмите сюда</a>.</p>
+    </div>
+
+    <script>
+        // Обратный отсчёт
+        let seconds = 10;
+        const countdownElement = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            seconds--;
+            countdownElement.textContent = seconds + ' ' + (seconds === 1 ? 'секунда' : 
+                                         seconds < 5 ? 'секунды' : 'секунд');
+            
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = "https://www.youtube.com";
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
