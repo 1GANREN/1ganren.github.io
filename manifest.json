@@ -1,0 +1,16 @@
+{
+    "name": "YouTube Redirect",
+    "short_name": "YouTube",
+    "description": "Быстрый доступ к YouTube",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ff0000",
+    "theme_color": "#ff0000",
+    "icons": [
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0iI2ZmMDAwMCIgcng9IjE1Ii8+PHBhdGggZD0iTTg0IDQ0djQwTDUyIDY0bDMyLTIweiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==",
+            "sizes": "128x128",
+            "type": "image/svg+xml"
+        }
+    ]
+}
