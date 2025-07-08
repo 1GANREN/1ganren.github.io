@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube PWA Redirect</title>
+    <meta name="theme-color" content="#ff0000">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Автогенерируемые иконки через CSS -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='red'/><text x='50%' y='50%' font-size='12' text-anchor='middle' fill='white' dy='.3em'>YT</text></svg>">
+    
+    <script>
+        // Регистрация Service Worker
+        if('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW error:', err));
+        }
+
+        // Таймер редиректа
+        let count = 10;
+        const timer = setInterval(() => {
+            document.getElementById('timer').textContent = count;
+            if(count-- <= 0) {
+                clearInterval(timer);
+                window.location.href = "https://www.youtube.com";
+            }
+        }, 1000);
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff0000, #b20710);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .timer {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 30px 0;
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        .install-btn {
+            background: white;
+            color: #ff0000;
+            border: none;
+            padding: 12px 25px;
+            margin-top: 20px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .install-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Переход на YouTube</h1>
+        <p>Автоматическое перенаправление через:</p>
+        <div id="timer" class="timer">10</div>
+        <p>Установите приложение для быстрого доступа</p>
+        
+        <button class="install-btn" id="installBtn">Установить PWA</button>
+        
+        <p class="note">После установки приложение будет доступно офлайн и запускаться как нативное</p>
+    </div>
+
+    <script>
+        // Кнопка установки PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+        
+        installBtn.addEventListener('click', async () => {
+            if(deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if(outcome === 'accepted') {
+                    installBtn.textContent = 'Установлено!';
+                    installBtn.disabled = true;
+                }
+                deferredPrompt = null;
+            }
+        });
+    </script>
+</body>
+</html>
